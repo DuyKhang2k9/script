@@ -1,27 +1,94 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Tạo GUI chính
+local menuGui = Instance.new("ScreenGui")
+menuGui.Name = "MenuGUI"
+menuGui.Parent = playerGui
+
+-- Tạo Frame chứa các nút
+local menuFrame = Instance.new("Frame")
+menuFrame.Size = UDim2.new(0, 250, 0, 200)
+menuFrame.Position = UDim2.new(0.5, -125, 0.5, -100)
+menuFrame.BackgroundTransparency = 0.4
+menuFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+menuFrame.BorderSizePixel = 0
+menuFrame.Active = true
+menuFrame.Draggable = true
+menuFrame.Parent = menuGui
+
+-- Tạo nhãn tiêu đề
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(0, 250, 0, 30)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Game Features Menu"
+titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.TextSize = 20
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.Parent = menuFrame
+
+-- Tạo nút InfJump
+local infJumpButton = Instance.new("TextButton")
+infJumpButton.Name = "InfJumpButton"
+infJumpButton.Size = UDim2.new(0.8, 0, 0, 30)
+infJumpButton.Position = UDim2.new(0.1, 0, 0.2, 0)
+infJumpButton.BackgroundColor3 = Color3.new(0, 0.5, 1)
+infJumpButton.Text = "Enable InfJump"
+infJumpButton.Font = Enum.Font.SourceSans
+infJumpButton.TextColor3 = Color3.new(1, 1, 1)
+infJumpButton.TextSize = 14
+infJumpButton.Parent = menuFrame
+
+-- Tạo nút Noclip
+local noclipButton = Instance.new("TextButton")
+noclipButton.Name = "NoclipButton"
+noclipButton.Size = UDim2.new(0.8, 0, 0, 30)
+noclipButton.Position = UDim2.new(0.1, 0, 0.4, 0)
+noclipButton.BackgroundColor3 = Color3.new(1, 0, 0)
+noclipButton.Text = "Enable Noclip"
+noclipButton.Font = Enum.Font.SourceSans
+noclipButton.TextColor3 = Color3.new(1, 1, 1)
+noclipButton.TextSize = 14
+noclipButton.Parent = menuFrame
+
+-- Tạo nút Dash
+local dashButton = Instance.new("TextButton")
+dashButton.Name = "DashButton"
+dashButton.Size = UDim2.new(0.8, 0, 0, 30)
+dashButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+dashButton.BackgroundColor3 = Color3.new(0.1, 0.6, 0.8)
+dashButton.Text = "Dash"
+dashButton.Font = Enum.Font.SourceSans
+dashButton.TextColor3 = Color3.new(1, 1, 1)
+dashButton.TextSize = 14
+dashButton.Parent = menuFrame
+
+-- Kết nối nút InfJump
+local infiniteJumpEnabled = false
+infJumpButton.MouseButton1Click:Connect(function()
+    infiniteJumpEnabled = not infiniteJumpEnabled
+    infJumpButton.Text = infiniteJumpEnabled and "Disable InfJump" or "Enable InfJump"
+end)
+
+-- Kết nối nút Noclip
+local noclipEnabled = false
+noclipButton.MouseButton1Click:Connect(function()
+    noclipEnabled = not noclipEnabled
+    noclipButton.Text = noclipEnabled and "Disable Noclip" or "Enable Noclip"
+end)
+
+-- Kết nối nút Dash
 local onCooldown = false
-local cooldownDuration = 0.01 --Time before dash is available again
-
-local dashSpeed = 50 --Speed of dash
-local dashDuration = 0.5 --Length of dash
-
-local dashKeys = {Enum.KeyCode.Q} --List of keys you can press to dash
-
-local dashMobileButton
-local mobileButtonImage = "rbxassetid://13213984187" --Image ID of dash mobile button
-local mobileButtonPosition = UDim2.new(1, -125, 1, -125) --Position of dash mobile button
-local normalImageColor = Color3.new(1, 1, 1) --Image color of dash mobile button when dash is available
-local cooldownImageColor = Color3.new(0.2, 0.2, 0.2) --Image color of dash mobile button when dash is on cooldown
-
-local dashFOVIncrease = 15 --Amount of FOV to increase default FOV by when dashing
-local defaultFOV
-
-local cas = game:GetService("ContextActionService")
+local cooldownDuration = 0.01
+local dashSpeed = 50
+local dashDuration = 0.5
+local dashFOVIncrease = 15
+local defaultFOV = workspace.CurrentCamera.FieldOfView
 local dashActionName = "DASH_ACTION"
 
 local camera = workspace.CurrentCamera
-defaultFOV = camera.FieldOfView
-
-local char = script.Parent
+local char = player.Character
 local root = char:WaitForChild("HumanoidRootPart")
 local humanoid = char:WaitForChild("Humanoid")
 
@@ -38,209 +105,57 @@ linearVelocity.MaxForce = math.huge
 linearVelocity.Enabled = false
 linearVelocity.Parent = root
 
-local dashAnimation = script:WaitForChild("DashAnimation")
-local animationTrack:AnimationTrack = humanoid:WaitForChild("Animator"):LoadAnimation(dashAnimation)
+local dashAnimation = Instance.new("Animation")
+dashAnimation.AnimationId = "rbxassetid://<AnimationID>" -- Thêm ID của animation dash vào đây.
+local animationTrack = humanoid:WaitForChild("Animator"):LoadAnimation(dashAnimation)
 animationTrack.Priority = Enum.AnimationPriority.Action
 animationTrack:AdjustSpeed(animationTrack.Length / dashDuration)
 
-local dashSound = script:WaitForChild("DashSound")
+local dashSound = Instance.new("Sound")
+dashSound.SoundId = "rbxassetid://<SoundID>" -- Thêm ID âm thanh của dash vào đây
 dashSound.Parent = root
 
 local raycastParams = RaycastParams.new()
 raycastParams.FilterDescendantsInstances = {char}
 raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
-
-function Lerp(a, b, t)
-	
-	return a + (b - a) * t
-end
-
-function IsDashAllowed(actionName: string, inputState: Enum.UserInputState)
-	
-	if onCooldown then return end
-
-	if actionName ~= dashActionName then return end
-
-	if inputState ~= Enum.UserInputState.Begin then return end
-
-	return true
-end
-
-function GetDashVelocity()
-	
-	local vectorMask = Vector3.new(1, 0, 1)
-
-	local direction = root.AssemblyLinearVelocity * vectorMask
-
-	if direction.Magnitude <= 0.1 then
-		direction = camera.CFrame.LookVector * vectorMask
-	end
-
-	direction = direction.Unit
-	local planeDirection = Vector2.new(direction.X, direction.Z)
-
-	local dashVelocity = planeDirection * dashSpeed
-	
-	return dashVelocity
-end
-
-function HandleCooldown()
-	
-	if dashMobileButton then
-		dashMobileButton.ImageColor3 = cooldownImageColor
-	end
-
-	local cooldownStarted = tick()
-	local lastTick = tick()
-
-	while tick() - cooldownStarted < cooldownDuration do
-
-		game:GetService("RunService").Heartbeat:Wait()
-		
-		local deltaTime = tick() - lastTick
-		lastTick = tick()
-
-		local startFOV
-
-		if linearVelocity.Enabled == false then
-			
-			if camera.FieldOfView > defaultFOV then
-				
-				if not startFOV then
-					startFOV = camera.FieldOfView
-				end
-				
-				local lerpAmount = deltaTime * 10
-				local newFOV = Lerp(startFOV, defaultFOV, lerpAmount)
-
-				camera.FieldOfView = newFOV
-			end
-		end
-	end
-	camera.FieldOfView = defaultFOV
-
-	if dashMobileButton then
-		dashMobileButton.ImageColor3 = normalImageColor
-	end
-
-	onCooldown = false
-end
-
-function HandleDashDuration()
-	
-	local dashStarted = tick()
-	
-	local startFOV = camera.FieldOfView
-	local goalFOV = defaultFOV + dashFOVIncrease
-	
-	local lastTick = tick()
-	
-	while tick() - dashStarted < dashDuration do
-
-		game:GetService("RunService").Heartbeat:Wait()
-		
-		if camera.FieldOfView < goalFOV then
-			local deltaTime = tick() - lastTick
-			lastTick = tick()
-			
-			local lerpAmount = deltaTime * 20
-			local newFOV = Lerp(camera.FieldOfView, goalFOV, lerpAmount)
-			
-			camera.FieldOfView = newFOV
-		end
-		
-		if IsDashBlocked() then
-			break
-		end
-	end
-end
-
-function IsDashBlocked()
-	
-	local rayOrigin = root.Position
-	local rayDirection = root.CFrame.LookVector
-	local rayDepth = 3
-	local ray = workspace:Raycast(rayOrigin, rayDirection * rayDepth, raycastParams)
-
-	if ray and ray.Instance.CanCollide and ray.Instance.Anchored then
-		return true
-	end
-end
-
-function DashEffects()
-	
-	animationTrack:Play()
-	dashSound:Play()
-end
-
-function EnableLinearVelocity(dashVelocity: Vector2)
-	
-	linearVelocity.PlaneVelocity = dashVelocity
-	linearVelocity.Enabled = true
-
-	humanoid.AutoRotate = false
-	root.CFrame = CFrame.new(root.Position, Vector3.new(dashVelocity.X, 0, dashVelocity.Y) * 1000)
-end
-
-function DisableLinearVelocity()
-	
-	linearVelocity.Enabled = false
-	humanoid.AutoRotate = true
-end
-
 function Dash(actionName: string, inputState: Enum.UserInputState)
-	
-	if dashMobileButton then
-		dashMobileButton.Image = mobileButtonImage
-	end
-	
-	if IsDashAllowed(actionName, inputState) then
-		
-		onCooldown = true
-		task.spawn(HandleCooldown)
-			
-		local dashVelocity = GetDashVelocity()
+    if onCooldown then return end
+    if inputState ~= Enum.UserInputState.Begin then return end
+    
+    onCooldown = true
+    task.spawn(function()
+        local dashVelocity = root.CFrame.LookVector * dashSpeed
+        linearVelocity.PlaneVelocity = dashVelocity
+        linearVelocity.Enabled = true
+        
+        humanoid.AutoRotate = false
+        root.CFrame = CFrame.new(root.Position, root.Position + dashVelocity)
+        animationTrack:Play()
+        dashSound:Play()
 
-		EnableLinearVelocity(dashVelocity)
-			
-		DashEffects()
-			
-		HandleDashDuration()
-			
-		DisableLinearVelocity()
-	end
+        -- Thêm hiệu ứng FOV
+        local goalFOV = defaultFOV + dashFOVIncrease
+        while camera.FieldOfView < goalFOV do
+            camera.FieldOfView = camera.FieldOfView + 1
+            wait(0.01)
+        end
+
+        -- Sau khi dash kết thúc
+        wait(dashDuration)
+        linearVelocity.Enabled = false
+        humanoid.AutoRotate = true
+
+        -- Quay lại FOV ban đầu
+        camera.FieldOfView = defaultFOV
+
+        -- Tắt cooldown
+        wait(cooldownDuration)
+        onCooldown = false
+    end)
 end
 
-cas:BindAction(dashActionName, Dash, true, unpack(dashKeys))
-
-dashMobileButton = cas:GetButton(dashActionName)
-
-if dashMobileButton then
-	
-	dashMobileButton.Image = mobileButtonImage
-	dashMobileButton.ImageColor3 = normalImageColor
-	dashMobileButton.Position = mobileButtonPosition
-end
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
-local dashGui = Instance.new("ScreenGui")
-dashGui.Name = "DashGUI"
-dashGui.Parent = playerGui
-
-local dashButton = Instance.new("TextButton")
-dashButton.Name = "DashButton"
-dashButton.Size = UDim2.new(0, 150, 0, 50)
-dashButton.Position = UDim2.new(0.5, -75, 0.8, 0) -- Vị trí giữa màn hình
-dashButton.BackgroundColor3 = Color3.new(0.1, 0.6, 0.8)
-dashButton.Text = "Dash"
-dashButton.Font = Enum.Font.SourceSansBold
-dashButton.TextSize = 20
-dashButton.TextColor3 = Color3.new(1, 1, 1)
-dashButton.Parent = dashGui
-
--- Kết nối sự kiện click của nút
 dashButton.MouseButton1Click:Connect(function()
-	Dash(dashActionName, Enum.UserInputState.Begin)
+    Dash(dashActionName, Enum.UserInputState.Begin)
 end)
+
