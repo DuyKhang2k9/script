@@ -89,6 +89,13 @@ end
 
 createGUI()
 
-game.Players.LocalPlayer.CharacterAdded:Connect(function() wait(0.5) -- Đợi nhân vật load lại createGUI() end)
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+  wait(0.5) -- Đợi nhân vật load lại
+  createGUI()
 
-        
+  -- Tắt các chức năng khi nhân vật chết
+  infiniteJumpEnabled = false
+  noclipEnabled = false
+
+end)
+
