@@ -115,13 +115,29 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
--- Khi nhân vật hồi sinh, tắt các chức năng
-game.Players.LocalPlayer.CharacterAdded:Connect(function()
+-- Tắt chức năng khi người chơi chết
+local function onCharacterAdded(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.Died:Connect(function()
+        infiniteJumpEnabled = false
+        noclipEnabled = false
+        infJumpButton.Text = "Bật InfJump"
+        noclipButton.Text = "Bật Noclip"
+    end)
+end
+
+-- Gọi hàm khi nhân vật xuất hiện
+if game.Players.LocalPlayer.Character then
+    onCharacterAdded(game.Players.LocalPlayer.Character)
+end
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
     wait(0.5)
     infiniteJumpEnabled = false
     noclipEnabled = false
     infJumpButton.Text = "Bật InfJump"
     noclipButton.Text = "Bật Noclip"
+    onCharacterAdded(character) -- Gắn thêm sự kiện Died mới
 end)
 
 -- FullBright
